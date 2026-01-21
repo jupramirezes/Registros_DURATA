@@ -1,59 +1,49 @@
 import streamlit as st
 import pandas as pd
 import pygwalker as pyg
-from streamlit_pygwalker import pyg_html
+import streamlit.components.v1 as components
 
-# Configuración de página (Sobria y Profesional)
+# Configuración de página profesional
 st.set_page_config(
-    page_title="Analizador Maestro de Datos",
+    page_title="Data Explorer Pro",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Estilo personalizado (Colores sobrios)
+# Estilo sobrio (Azules oscuros y grises)
 st.markdown("""
     <style>
-    .main { background-color: #F8F9FA; }
-    .stButton>button { background-color: #2C3E50; color: white; border-radius: 5px; }
+    .stApp { background-color: #FDFDFD; }
+    header { background-color: #2C3E50 !important; }
+    .stButton>button { background-color: #34495E; color: white; }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📊 Explorador Dinámico de Cotizaciones")
-st.subheader("Interfaz de Autoservicio (Power BI Style)")
+st.title("📊 Análisis Dinámico de Datos")
 
-# 1. Cargador de archivos Excel
-uploaded_file = st.sidebar.file_uploader("Arrastra aquí tu archivo de Excel (.xlsx)", type=['xlsx'])
+# Cargador de Excel en la barra lateral
+st.sidebar.header("Configuración")
+uploaded_file = st.sidebar.file_uploader("Sube tu archivo REGISTRO_MAESTRO.xlsx", type=['xlsx'])
 
 if uploaded_file:
     try:
-        # Lectura de datos
+        # Cargar datos
         df = pd.read_excel(uploaded_file)
         
-        st.sidebar.success("Archivo cargado correctamente")
+        # Generar la interfaz de Power BI (PyGWalker)
+        # Usamos el tema 'vega' para mantener la sobriedad
+        pyg_html = pyg.to_html(df)
         
-        # 2. Motor de Visualización (PyGWalker)
-        # Esto genera la interfaz de "arrastrar y soltar"
-        pyg_config = {
-            "theme": "vega", # Estilo limpio y profesional
-        }
+        # Renderizar en la web
+        components.html(pyg_html, height=900, scrolling=True)
         
-        # Renderizar la interfaz de exploración
-        # Permite crear gráficos, filtros y dashboards dinámicos
-        walker_html = pyg.to_html(df)
-        st.components.v1.html(walker_html, height=800, scrolling=True)
+        st.sidebar.success("Datos cargados. Usa el panel superior para arrastrar campos.")
         
-        # 3. Opción de Exportación
+        # Instrucción para PDF
         st.sidebar.markdown("---")
-        st.sidebar.write("### Exportación")
-        if st.sidebar.button("Preparar Informe para PDF"):
-            st.sidebar.info("Para exportar: Usa el atajo Ctrl+P (Imprimir) y selecciona 'Guardar como PDF'. La interfaz está optimizada para capturar los gráficos actuales.")
+        st.sidebar.info("💡 **Para exportar a PDF:** Una vez diseñado tu gráfico, presiona `Ctrl + P` en tu teclado y elige 'Guardar como PDF'.")
 
     except Exception as e:
-        st.error(f"Error al procesar el archivo: {e}")
-
+        st.error(f"Hubo un problema al leer el Excel: {e}")
 else:
-    st.info("👋 Por favor, carga el archivo REGISTRO_MAESTRO.xlsx en el panel de la izquierda para comenzar a graficar.")
-    
-    # Preview de cómo se vería la estructura con datos de ejemplo si no hay archivo
-    st.image("https://raw.githubusercontent.com/Kanaries/pygwalker/main/docs/images/pygwalker-ui.png", 
-             caption="Ejemplo de la interfaz de arrastre de campos que obtendrás.")
+    st.info("Para comenzar, arrastra el archivo de Excel en el panel de la izquierda.")
