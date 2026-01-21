@@ -1,5 +1,4 @@
 streamlit
 pandas
 pygwalker
-streamlit-pygwalker
 openpyxl
